@@ -43,3 +43,12 @@ function Fragments() {
 }
 ```
 * Items in braces must be primitives, so ==no objects!==
+
+## Looping through a component
+### Passing Array as Prop
+https://bobbyhadz.com/blog/react-pass-array-as-prop
+
+### Looping with map
+https://www.telerik.com/blogs/beginners-guide-loops-in-react-jsx
+
+
