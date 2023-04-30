@@ -1,12 +1,12 @@
-function Header(props){
-  return(
+function Header(props) {
+  return (
     <>
       <h1>{props.course}</h1>
     </>
-  )
+  );
 }
-function Content({arr}){
-  console.log(arr);
+function Content({ arr }) {
+  // console.log(arr);
   // return (
   // <>
   //   <Part {...arr[0]}/>
@@ -16,39 +16,43 @@ function Content({arr}){
   // )
   return (
     <>
-      {
-        arr.map((prop, index) => (
-          <Part part={prop.part} ex={prop.ex} key={index} />
-        ))
-      }
+      {arr.map((prop, index) => (
+        <Part part={prop.part} exercises={prop.exercises} key={index} />
+      ))}
     </>
-  )
+  );
 }
-function Part(props){
-  return(
+function Part(props) {
+  return (
     <>
-      <p key={props.index}>{ props.part} {props.ex }</p>
+      <p key={props.index}>
+        {props.part} {props.exercises}
+      </p>
     </>
-  )
+  );
 }
-function Total(props){
-  return(<> <p>Number of exercises {props.total}</p> </>)
+function Total({ arr }) {
+  console.log("Reduce total ", arr);
+  let total = arr.reduce((acc, cur) => acc + cur.exercises, 0);
+  return (
+    <>
+      <p>Number of exercises {total}</p>
+    </>
+  );
 }
 function App() {
-  const course = 'Half stack application development';  
-  const part1 = 'Fundamentals of React'
-  const exercises1 = 10;
-  const part2 = 'Using props to pass data';
-  const exercises2 = 7;
-  const part3 = 'State of a component';
-  const exercises3 = 14;
-  const contentProps = [{part: part1, ex: exercises1}, {part: part2, ex: exercises2}, {part: part3, ex: exercises3} ] 
+  const course = "Half stack application development";
+  const parts = [
+    { name: "Fundamentals of React", exercises: 10 },
+    { name: "Using props to pass data", exercises: 7 },
+    { name: "State of a component", exercises: 14 },
+  ];
 
   return (
     <div className="body">
-      <Header course={course}/>
-      <Content arr={contentProps}/>
-      <Total total={exercises1+exercises2+exercises3}/>
+      <Header course={course} />
+      <Content arr={parts} />
+      <Total arr={parts} />
     </div>
   );
 }
