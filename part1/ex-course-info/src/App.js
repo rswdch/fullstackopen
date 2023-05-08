@@ -1,58 +1,54 @@
-function Header(props) {
-  return (
-    <>
-      <h1>{props.course}</h1>
-    </>
-  );
-}
-function Content({ arr }) {
-  // console.log(arr);
-  // return (
-  // <>
-  //   <Part {...arr[0]}/>
-  //   <Part {...arr[1]}/>
-  //   <Part {...arr[2]}/>
-  // </>
-  // )
-  return (
-    <>
-      {arr.map((prop, index) => (
-        <Part part={prop.part} exercises={prop.exercises} key={index} />
-      ))}
-    </>
-  );
-}
-function Part(props) {
-  return (
-    <>
-      <p key={props.index}>
-        {props.part} {props.exercises}
-      </p>
-    </>
-  );
-}
-function Total({ arr }) {
-  console.log("Reduce total ", arr);
-  let total = arr.reduce((acc, cur) => acc + cur.exercises, 0);
-  return (
-    <>
-      <p>Number of exercises {total}</p>
-    </>
-  );
-}
+import {Course, Header, Content, Part, Total} from './components/Course'
+import './App.css';
 function App() {
-  const course = "Half stack application development";
-  const parts = [
-    { name: "Fundamentals of React", exercises: 10 },
-    { name: "Using props to pass data", exercises: 7 },
-    { name: "State of a component", exercises: 14 },
-  ];
+  const courses = [
+    {
+      name: 'Half Stack application development',
+      id: 1,
+      parts: [
+        {
+          name: 'Fundamentals of React',
+          exercises: 10,
+          id: 1
+        },
+        {
+          name: 'Using props to pass data',
+          exercises: 7,
+          id: 2
+        },
+        {
+          name: 'State of a component',
+          exercises: 14,
+          id: 3
+        },
+        {
+          name: 'Redux',
+          exercises: 11,
+          id: 4
+        }
+      ]
+    }, 
+    {
+      name: 'Node.js',
+      id: 2,
+      parts: [
+        {
+          name: 'Routing',
+          exercises: 3,
+          id: 1
+        },
+        {
+          name: 'Middlewares',
+          exercises: 7,
+          id: 2
+        }
+      ]
+    }
+  ]
 
   return (
     <div className="body">
-      <Header course={course} />
-      <Content arr={parts} />
-      <Total arr={parts} />
+      <Course key="root" data={courses}/>
     </div>
   );
 }
