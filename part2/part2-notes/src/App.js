@@ -6,34 +6,49 @@ const App = (props) => {
   // notes<Array> = {id, content, important}
   const [notes, setNotes] = useState(props.notes);
   const [newNote, setNewNote] = useState("a new note...");
+  const [showAll, setShowAll] = useState(true);
 
-  // FUNCTION DEFINITIONS
+  /* FUNCTION DEFINITIONS */
 
-  // addNote function to add new note
+  // addNote function to add new note when submit is clicked
   // INPUT: event
   const addNote = (event) => {
     event.preventDefault();
+
     // Construct the new note object to register
     const noteObject = {
       content: newNote,
       important: Math.random() < 0.5,
-      id: notes.length + 1,
+      id: notes.length + 1 /* IMPORTANT: Assign ID */,
     };
 
-    // Append the new note to the notes object of state
+    // Append the new note to notes<Array>: {content, important, id}
     setNotes(notes.concat(noteObject));
     setNewNote("");
   };
+
+  // handleNoteChange
+  // Update the state of newNote when field is changed
   const handleNoteChange = (event) => {
     // console.log(event.target.value);
-    // setNewNote(event.target.value);
+    setNewNote(event.target.value);
   };
+
+  /* show only important = true notes */
+  const notesToShow = showAll ? notes : notes.filter(note => note.important === true);
 
   return (
     <div>
       <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+  
+        </button>
+      </div>
+      {/* Show all the note items */}
       <ul>
-        {notes.map((note) => (
+        {notesToShow.map((note) => (
           <Note key={note.id} note={note} />
         ))}
       </ul>{" "}
