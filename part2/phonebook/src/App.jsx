@@ -1,5 +1,7 @@
 import { useState } from "react";
 import "./App.css";
+import Filter from "./components/Filter.jsx";
+import { Persons, PersonForm } from "./components/Persons.jsx";
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -40,9 +42,11 @@ const App = () => {
   }
 
   function handleNameChange(event) {
+    // console.log("Handling name change");
     setNewName(event.target.value);
   }
   function handleNumChange(event) {
+    // console.log("Handling number change");
     setNewNum(event.target.value);
   }
   function handleFilterChange(event) {
@@ -65,35 +69,21 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <form action="">
-        <div>
-          filter shown with{" "}
-          <input type="text" value={filterText} onChange={handleFilterChange} />
-        </div>
-      </form>
+      <Filter
+        objArr={persons}
+        filterText={filterText}
+        onChange={handleFilterChange}
+      ></Filter>
       <h2>Add New Phonebook Entry</h2>
-      <form>
-        <div>
-          name:{" "}
-          <input type="text" value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input type="tel" value={newNum} onChange={handleNumChange} />
-        </div>
-        <div>
-          <button type="submit" onClick={addPerson}>
-            add
-          </button>
-        </div>
-      </form>
+      <PersonForm
+        name={newName}
+        number={newNum}
+        handleNameChange={handleNameChange}
+        handleNumChange={handleNumChange}
+        handleSubmission={addPerson}
+      ></PersonForm>
       <h2>Phonebook Entries</h2>
-      <ul>
-        {filteredEntries.map((person) => (
-          <li key={person.name} className="phonebook-numbers">
-            {person.name} {person.number}
-          </li>
-        ))}
-      </ul>
+      <Persons entries={filteredEntries} />
     </div>
   );
 };
