@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-import axios from 'axios'
+import axios from "axios";
 import Note from "./components/Note";
 
 const App = () => {
   // notes is being passed from index.js
   // notes<Array> = {id, content, important}
-  const [notes, setNotes] = useState();
+  const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("a new note...");
   const [showAll, setShowAll] = useState(true);
 
   /* DATA FETCHING */
   useEffect(() => {
     console.log('effect');
-    axios
-      .get('http://localhost:3001/notes')
+    axios.get('http://localhost:3001/notes')
       .then(response => {
         console.log('promise fulfilled');
         setNotes(response.data);
       })
+      .catch(e => console.log('Could not fetch notes'))
     },[])
   console.log('render', notes.length, 'notes');
 
@@ -36,8 +36,16 @@ const App = () => {
     };
 
     // Append the new note to notes<Array>: {content, important, id}
-    setNotes(notes.concat(noteObject));
-    setNewNote("");
+    // setNotes(notes.concat(noteObject));
+    // setNewNote("");
+
+    // POST data to server
+    axios.post('http://localhost:3001/notes', noteObject)
+      .then(response => {
+        console.log(response);
+        setNotes(notes.concat(noteObject));
+        setNewNote("");
+      });
   };
 
   // handleNoteChange
