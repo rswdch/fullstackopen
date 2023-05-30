@@ -3,14 +3,15 @@ import "./App.css";
 import Filter from "./components/Filter.jsx";
 import { Persons, PersonForm } from "./components/Persons.jsx";
 import axios from 'axios';
+import personsService from './services/persons';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data);
+    personsService.getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons);
       })
   }, []);
 
@@ -32,16 +33,34 @@ const App = () => {
       return;
     }
 
-    setPersons(() => {
-      let newPersons = persons.concat({
-        name: newName,
-        number: newNum,
-        id: persons.length,
-      });
-      setNewName("");
-      setNewNum("");
-      return newPersons;
-    });
+    let newPerson = {
+      name: newName,
+      number: newNum,
+    };
+    personsService.create(newPerson)
+      .then(response => {
+        setPersons(persons.concat(response));
+        setNewName("");
+        setNewNum("");
+      })
+      .catch((err) => {
+        console.log("Error in posting new person");
+        console.log(err);
+      })
+  }
+
+  function removePerson(id){
+    console.log(`Deleting person ${id}`)
+    let personToDelete;
+    axios.delete(`http://localhost:3001/persons/${id}`)
+      .then(() =>{
+        // getAll returns a promise and response data, which is an array
+        return personsService.getAll();
+      })
+      .then(response => {
+        setPersons(response);
+      })
+
   }
 
   function handleNameChange(event) {
@@ -86,7 +105,7 @@ const App = () => {
         handleSubmission={addPerson}
       ></PersonForm>
       <h2>Phonebook Entries</h2>
-      <Persons entries={filteredEntries} />
+      <Persons entries={filteredEntries} deletePerson={removePerson}/>
     </div>
   );
 };

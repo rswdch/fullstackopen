@@ -1,9 +1,10 @@
-function Persons({ entries }) {
+function Persons({ entries, deletePerson }) {
   return (
     <ul>
       {entries.map((person) => (
         <li key={person.name} className="phonebook-numbers">
           {person.name} {person.number}
+          <button type="submit" onClick={() => deletePerson(person.id)}> delete</button>
         </li>
       ))}
     </ul>
