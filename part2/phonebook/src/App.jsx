@@ -2,17 +2,16 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import Filter from "./components/Filter.jsx";
 import { Persons, PersonForm } from "./components/Persons.jsx";
-import axios from 'axios';
-import personsService from './services/persons';
+import axios from "axios";
+import personsService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
 
   useEffect(() => {
-    personsService.getAll()
-      .then(initialPersons => {
-        setPersons(initialPersons);
-      })
+    personsService.getAll().then((initialPersons) => {
+      setPersons(initialPersons);
+    });
   }, []);
 
   const [newName, setNewName] = useState("");
@@ -27,9 +26,13 @@ const App = () => {
       return;
     }
     // check if name is in array already
-    const isInArray = persons.some((person) => person.name === newName);
+    const isInArray = persons.find((person) => person.name === newName);
     if (isInArray) {
-      alert(`${newName} is already added to phonebook.`);
+      const replace = confirm(
+        `${newName} is already added to phonebook. Do you want to replace?`
+      );
+      if (!replace) return;
+      removePerson(isInArray.id);
       return;
     }
 
@@ -37,8 +40,9 @@ const App = () => {
       name: newName,
       number: newNum,
     };
-    personsService.create(newPerson)
-      .then(response => {
+    personsService
+      .create(newPerson)
+      .then((response) => {
         setPersons(persons.concat(response));
         setNewName("");
         setNewNum("");
@@ -46,21 +50,21 @@ const App = () => {
       .catch((err) => {
         console.log("Error in posting new person");
         console.log(err);
-      })
+      });
   }
 
-  function removePerson(id){
-    console.log(`Deleting person ${id}`)
+  function removePerson(id) {
+    console.log(`Deleting person ${id}`);
     let personToDelete;
-    axios.delete(`http://localhost:3001/persons/${id}`)
-      .then(() =>{
+    axios
+      .delete(`http://localhost:3001/persons/${id}`)
+      .then(() => {
         // getAll returns a promise and response data, which is an array
         return personsService.getAll();
       })
-      .then(response => {
+      .then((response) => {
         setPersons(response);
-      })
-
+      });
   }
 
   function handleNameChange(event) {
@@ -105,7 +109,7 @@ const App = () => {
         handleSubmission={addPerson}
       ></PersonForm>
       <h2>Phonebook Entries</h2>
-      <Persons entries={filteredEntries} deletePerson={removePerson}/>
+      <Persons entries={filteredEntries} deletePerson={removePerson} />
     </div>
   );
 };
