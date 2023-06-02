@@ -10,6 +10,7 @@ let notes = [
 ];
 
 const app = express();
+app.use(express.json());
 
 // Express Routes
 app.get("/", (request, response) => {
@@ -28,6 +29,29 @@ app.get("/api/notes/:id", (request, response) => {
     console.log(note.id, typeof note.id, id, typeof id, note.id === id);
     return note.id === id;
   });
+  response.json(note);
+});
+
+// POST Logic
+const generateId = () => {
+  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
+  return maxId + 1;
+};
+
+app.post("/api/notes", (request, response) => {
+  // Validation
+  if (!request.body.content) {
+    return response.status(400).json({
+      error: "content missing",
+    });
+  }
+
+  const note = {
+    content: request.body.content,
+    important: request.body.important || false,
+    id: generateId(),
+  };
+  notes = notes.concat(note);
   response.json(note);
 });
 
