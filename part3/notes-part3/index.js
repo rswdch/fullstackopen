@@ -11,6 +11,15 @@ let notes = [
 
 const app = express();
 app.use(express.json());
+// Log every request
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+app.use(requestLogger)
 
 // Express Routes
 app.get("/", (request, response) => {
@@ -54,6 +63,12 @@ app.post("/api/notes", (request, response) => {
   notes = notes.concat(note);
   response.json(note);
 });
+
+// 404 Middleware
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
 
 // Start server
 const PORT = 3001;

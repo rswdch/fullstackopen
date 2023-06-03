@@ -1,4 +1,5 @@
 const express = require("express");
+const morgan = require('morgan');
 let persons = [
   {
     id: 1,
@@ -22,8 +23,23 @@ let persons = [
   },
 ];
 
+// Middleware
 const app = express();
 app.use(express.json());
+// Custom Middleware
+app.use(morgan('tiny', {
+  skip: (req) => {
+    return req.method === 'POST'
+  }
+}));
+morgan.token('body', (req) => {
+  return JSON.stringify(req.body);
+})
+app.use(morgan(':method :url :response-time ms :body', {
+  skip: (req) => {
+    return req.method !== 'POST'
+  }
+}))
 
 // Express Routes
 app.get("/", (request, response) => {
@@ -101,6 +117,12 @@ app.post('/api/persons', (request, response) => {
   persons = persons.concat(newPerson);
   response.json(newPerson);
 });
+
+// 404 Middleware
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
 
 // Start server
 const PORT = 3001;

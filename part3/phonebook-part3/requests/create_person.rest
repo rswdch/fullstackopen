@@ -5,3 +5,12 @@ Content-Type: application/json; charset=utf-8
   "name": "Sohee Cat",
   "number": "123-456-789"
 }
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json; charset=utf-8
+
+{
+  "name": "Ryan Person",
+  "number": "909-555-5555"
+}
