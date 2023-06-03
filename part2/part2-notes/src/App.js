@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Note from "./components/Note";
+import noteService from './services/notes';
 
 const App = () => {
   // notes is being passed from index.js
@@ -12,7 +12,7 @@ const App = () => {
   /* DATA FETCHING */
   useEffect(() => {
     console.log('effect');
-    axios.get('http://localhost:3001/notes')
+    noteService.getAll()
       .then(response => {
         console.log('promise fulfilled');
         setNotes(response.data);
@@ -40,7 +40,7 @@ const App = () => {
     // setNewNote("");
 
     // POST data to server
-    axios.post('http://localhost:3001/notes', noteObject)
+    noteService.create(noteObject)
       .then(response => {
         console.log(response);
         setNotes(notes.concat(noteObject));
