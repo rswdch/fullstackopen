@@ -12,6 +12,7 @@ let notes = [
 
 const app = express();
 app.use(express.json());
+app.use(express.static('build')) // Connect to front end
 app.use(cors());
 // Log every request
 const requestLogger = (request, response, next) => {
