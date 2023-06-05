@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import Filter from "./components/Filter.jsx";
 import { Persons, PersonForm } from "./components/Persons.jsx";
-import axios from "axios";
 import personsService from "./services/persons";
 
 const App = () => {
@@ -55,9 +54,8 @@ const App = () => {
 
   function removePerson(id) {
     console.log(`Deleting person ${id}`);
-    let personToDelete;
-    axios
-      .delete(`http://localhost:3001/persons/${id}`)
+    personsService
+      .remove(id)
       .then(() => {
         // getAll returns a promise and response data, which is an array
         return personsService.getAll();

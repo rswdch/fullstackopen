@@ -17,9 +17,12 @@ async function create(newPerson){
 
 async function remove(id){
   // Exercise 3.4 was skipped
+  const request = await axios.delete(`${baseUrl}/${id}`)
+  return request.data;
 }
 
 export default {
   getAll,
   create,
+  remove,
 }
