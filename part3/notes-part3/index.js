@@ -1,5 +1,8 @@
 const express = require("express");
+require('dotenv').config()
 const cors = require('cors');
+const Note = require('./models/note')
+
 let notes = [
   { id: 1, content: "HTML is easy", important: true },
   { id: 2, content: "Browser can execute only JavaScript", important: false },
@@ -31,18 +34,17 @@ app.get("/", (request, response) => {
   );
 });
 
-app.get("/api/notes", (request, response) => {
-  response.json(notes);
-});
+app.get('/api/notes', (request, response) => {
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
+})
 
-app.get("/api/notes/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const note = notes.find((note) => {
-    console.log(note.id, typeof note.id, id, typeof id, note.id === id);
-    return note.id === id;
-  });
-  response.json(note);
-});
+app.get('/api/notes/:id', (request, response) => {
+  Note.findById(request.params.id).then(note => {
+    response.json(note)
+  })
+})
 
 // POST Logic
 const generateId = () => {
@@ -58,13 +60,13 @@ app.post("/api/notes", (request, response) => {
     });
   }
 
-  const note = {
+  const note = new Note({
     content: request.body.content,
     important: request.body.important || false,
-    id: generateId(),
-  };
-  notes = notes.concat(note);
-  response.json(note);
+  });
+  note.save().then(savedNote => {
+    response.json(savedNote);
+  })
 });
 
 // 404 Middleware
