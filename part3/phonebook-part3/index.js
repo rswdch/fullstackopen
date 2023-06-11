@@ -1,26 +1,27 @@
-const express = require("express");
+const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const Person = require('./models/Person');
 let persons = [
   {
     id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
+    name: 'Arto Hellas',
+    number: '040-123456',
   },
   {
     id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
+    name: 'Ada Lovelace',
+    number: '39-44-5323523',
   },
   {
     id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
+    name: 'Dan Abramov',
+    number: '12-43-234345',
   },
   {
     id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
+    name: 'Mary Poppendieck',
+    number: '39-23-6423122',
   },
 ];
 
@@ -32,28 +33,20 @@ app.use(cors()); // For development ports
 // Custom Middleware
 app.use(morgan('tiny', {
   skip: (req) => {
-    return req.method === 'POST'
+    return req.method === 'POST';
   }
 }));
 morgan.token('body', (req) => {
   return JSON.stringify(req.body);
-})
+});
 app.use(morgan(':method :url :response-time ms :body', {
   skip: (req) => {
-    return req.method !== 'POST'
+    return req.method !== 'POST';
   }
-}))
+}));
 
 // Express Routes
-app.get("/", (request, response) => {
-  response.send(
-    `<h1>Hello World!</h1>
-    <a href=/api/persons>View the phonebook</a><br>
-    <a href=/404>404</a>`
-  );
-});
-
-app.get("/info", (request, response) => {
+app.get('/info', (request, response) => {
   const body = `<p>Phonebook has info for ${persons.length} people.</p>
     <p>${new Date()}</p>`;
 
@@ -61,24 +54,27 @@ app.get("/info", (request, response) => {
   response.send(body);
 });
 
-app.get("/api/persons", (request, response) => {
-  response.json(persons);
+app.get('/api/persons', (request, response) => {
+  Person.find({}).then(people => {
+    response.json(people);
+  });
+  // response.json(Person.find({})); // does not work
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  console.log("Getting Person");
-  const id = Number(request.params.id);
-  const person = persons.find((entry) => entry.id === id);
-  if (!person) {
-    return response.status(400).json({
-      error: "person not found",
-    });
-  }
-  response.json(person);
+app.get('/api/persons/:id', (request, response, next) => {
+  console.log('Getting Person');
+  Person.findById(request.params.id)
+    .then(foundPerson => {
+      if (foundPerson) response.json(foundPerson);
+      else {
+        response.status(404).end();
+      }
+    })
+    .catch(error => next(error));
 });
 
 // DELETE Request
-app.delete("/api/persons/:id", (request, response) =>{
+app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id);
   // Check if person exists. Not necessary but will return error if person does not exist.
   // const person = persons.find((entry) => entry.id === id);
@@ -89,43 +85,51 @@ app.delete("/api/persons/:id", (request, response) =>{
   // }
   persons = persons.filter(entry => {
     return entry.id !== id;
-  })
+  });
   response.json(persons);
-})
+});
 
 // POST Request
-const generateId = () => {
-  return Math.round(Math.random() * 10000000);
-}
+// const generateId = () => {
+//   return Math.round(Math.random() * 10000000);
+// };
 
 app.post('/api/persons', (request, response) => {
   // Check that all fields are filled
   if (!request.body.name || !request.body.number) {
     return response.status(400).json({
-      error: "content missing",
-    })
+      error: 'content missing',
+    });
   }
   // check if person already exists
-  if (persons.find((entry) => entry.name === request.body.name)){
-    return response.status(400).json({
-      error: "name must be unique",
-    })
-  }
 
-  const newPerson = {
-    id: generateId(),
+  const newPerson = new Person({
     name: request.body.name,
     number: request.body.number,
-  }
-  persons = persons.concat(newPerson);
-  response.json(newPerson);
+  });
+  newPerson.save().then(() => {
+    console.log('New person added');
+    response.json(newPerson);
+  });
+
 });
 
 // 404 Middleware
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-app.use(unknownEndpoint)
+  response.status(404).send({ error: 'unknown endpoint' });
+};
+app.use(unknownEndpoint);
+
+// Error Handler
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' });
+  }
+  next(error);
+};
+// NEEDS TO BE last loaded middleware.
+app.use(errorHandler);
 
 // Start server
 const PORT = 3001;
