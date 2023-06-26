@@ -57,7 +57,7 @@ app.get('/info', (request, response) => {
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(people => {
     response.json(people);
-  });
+  }).catch(error => next(error));
   // response.json(Person.find({})); // does not work
 });
 
@@ -83,24 +83,27 @@ app.delete('/api/persons/:id', (request, response) => {
   //     error: "person not found",
   //   });
   // }
-  persons = persons.filter(entry => {
-    return entry.id !== id;
-  });
-  response.json(persons);
+  Person.findByIdAndRemove(id).then(result => {
+    response.status(204).end();
+  }).catch(error => next(error));
+  // persons = persons.filter(entry => {
+  //   return entry.id !== id;
+  // });
+  // response.json(persons);
 });
 
 // POST Request
+// Posts a *new* person to database
 // const generateId = () => {
 //   return Math.round(Math.random() * 10000000);
 // };
-
-app.post('/api/persons', (request, response) => {
-  // Check that all fields are filled
-  if (!request.body.name || !request.body.number) {
-    return response.status(400).json({
-      error: 'content missing',
-    });
-  }
+app.post('/api/persons', (request, response, next) => {
+  // Check that all fields are filled -> Superseded by error handling middleware
+  // if (!request.body.name || !request.body.number) {
+  //   return response.status(400).json({
+  //     error: 'content missing',
+  //   });
+  // }
   // check if person already exists
 
   const newPerson = new Person({
@@ -110,8 +113,21 @@ app.post('/api/persons', (request, response) => {
   newPerson.save().then(() => {
     console.log('New person added');
     response.json(newPerson);
-  });
+  }).catch(error => next(error));
 
+});
+
+// PUT request
+// Replaces the phone number of a person who is already in the database
+app.put('/api/persons/:id', (request, response, next) => {
+  const id = Number(request.params.id);
+  const newPerson = {
+    name: request.body.name,
+    number: request.body.number
+  };
+  Person.findByIdAndUpdate(request.params.id, newPerson, { new: true })
+    .then(updatedPerson => response.json(updatedPerson))
+    .catch(error => next(error));
 });
 
 // 404 Middleware
@@ -125,10 +141,12 @@ const errorHandler = (error, request, response, next) => {
   console.error(error.message);
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' });
+  } else if (error.name === 'ValidationError') { // MongoDB validation
+    return response.status(400).json({ error: error.message });
   }
   next(error);
 };
-// NEEDS TO BE last loaded middleware.
+// Error NEEDS TO BE last loaded middleware.
 app.use(errorHandler);
 
 // Start server

@@ -13,6 +13,7 @@ let notes = [
   },
 ];
 
+// *** Middleware that must be first ***
 const app = express();
 app.use(express.json());
 app.use(express.static('build')) // Connect to front end
@@ -27,6 +28,7 @@ const requestLogger = (request, response, next) => {
 }
 app.use(requestLogger)
 
+// *** Routing Middleware ***
 // Express Routes
 app.get("/", (request, response) => {
   response.send(
@@ -66,14 +68,48 @@ app.post("/api/notes", (request, response) => {
   });
   note.save().then(savedNote => {
     response.json(savedNote);
-  })
+  }).catch(error => next(error))
 });
+// DELETE
+app.delete('/api/notes/:id', (request, response, next) => {
+  Note.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+// POST (update)
+// toggle important
+app.put('/api/notes/:id', (request, response, next) => {
+  const body = request.body
+  const note = {
+    content: body.content,
+    important: body.important,
+  }
 
+  Note.findByIdAndUpdate(request.params.id, note, { new: true })
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error))
+})
+// *** Middlware of Unknown Endpoints ***
 // 404 Middleware
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') { // MongoDB validation
+    return response.status(400).json({ error: error.message })
+  }
+  next(error)
+}
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 3001

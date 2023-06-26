@@ -48,7 +48,7 @@ const App = () => {
       })
       .catch((err) => {
         console.log("Error in posting new person");
-        console.log(err);
+        console.log(err.response.data.error)
       });
   }
 
